@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  self-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Validate sample plugin
+        run: python scripts/validate_plugin.py --repo tests/sample_plugin_repo --strict
+      - name: Build and validate zip
+        run: |
+          python scripts/build_zip.py --repo tests/sample_plugin_repo --out "$RUNNER_TEMP/dist"
+          python scripts/validate_plugin.py --zip "$RUNNER_TEMP"/dist/*.zip
